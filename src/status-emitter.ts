@@ -1,0 +1,78 @@
+import { inject, injectable } from "inversify";
+import { TemplateEngine, Templates } from "./template/template-engine";
+import { ConfigurationService, TestNgConfig } from "./configuration";
+import { Harness } from "@swingletree-oss/harness";
+import { TestNg, TestNgReportData } from "./model";
+import ScottyClient from "@swingletree-oss/scotty-client";
+
+@injectable()
+class TestNgStatusEmitter {
+  private readonly templateEngine: TemplateEngine;
+  private readonly context: string;
+  private readonly scottyClient: ScottyClient;
+
+  constructor(
+    @inject(ConfigurationService) configurationService: ConfigurationService,
+    @inject(TemplateEngine) templateEngine: TemplateEngine
+  ) {
+    this.templateEngine = templateEngine;
+    this.scottyClient = new ScottyClient(configurationService.get(TestNgConfig.SCOTTY_URL));
+    this.context = configurationService.get(TestNgConfig.CONTEXT);
+  }
+
+  public getAnnotations(report: TestNg.Report): Harness.Annotation[] {
+    const annotations: Harness.Annotation[] = [];
+
+    report["testng-results"].suite?.forEach((suite: TestNg.Suite) => {
+      suite.test?.forEach((test: TestNg.Test) => {
+        test.class?.forEach((testClass) => {
+          testClass["test-method"]?.forEach((method: TestNg.TestMethod) => {
+            if (method.$.status == "FAIL") {
+              const annotation = new Harness.ProjectAnnotation();
+              annotation.severity = Harness.Severity.BLOCKER;
+              annotation.title = method.$.signature;
+              annotation.detail = method.$.description;
+              annotation.metadata = {
+                duration_ms: method.$["duration-ms"],
+                suite: suite.$.name,
+                class: testClass.$.name,
+                started: method.$["started-at"],
+                finished: method.$["finished-at"]
+              };
+
+              annotations.push(annotation);
+            }
+          });
+        });
+      });
+    }, [] as Harness.Annotation[]);
+
+    return annotations;
+  }
+
+  public async sendReport(event: TestNgReportData, uid: string) {
+    const annotations = this.getAnnotations(event.report);
+
+    const templateData: TestNg.ReportTemplate = {
+      event: event
+    };
+
+    const notificationData: Harness.AnalysisReport = {
+      sender: this.context,
+      source: event.source,
+      uuid: uid,
+      checkStatus: annotations.length == 0 ? Harness.Conclusion.PASSED : Harness.Conclusion.BLOCKED,
+      title: `${annotations.length} failed tests`,
+      annotations: annotations
+    };
+
+    notificationData.markdown = this.templateEngine.template<TestNg.ReportTemplate>(
+      Templates.REPORT,
+      templateData
+    );
+
+    return await this.scottyClient.sendReport(notificationData);
+  }
+}
+
+export default TestNgStatusEmitter;
