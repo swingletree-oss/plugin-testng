@@ -23,11 +23,24 @@ class TestNgStatusEmitter {
   public getAnnotations(report: TestNg.Report): Harness.Annotation[] {
     const annotations: Harness.Annotation[] = [];
 
-    report["testng-results"].suite?.forEach((suite: TestNg.Suite) => {
+    const results = report["testng-results"];
+
+    report._tests = {
+      failed: 0,
+      skipped: 0,
+      succeeded: 0,
+      total: 0
+    };
+
+    results.suite?.forEach((suite: TestNg.Suite) => {
       suite.test?.forEach((test: TestNg.Test) => {
         test.class?.forEach((testClass) => {
           testClass["test-method"]?.forEach((method: TestNg.TestMethod) => {
+            report._tests.total++;
+
             if (method.$.status == "FAIL") {
+              report._tests.failed++;
+
               const annotation = new Harness.ProjectAnnotation();
               annotation.severity = Harness.Severity.BLOCKER;
               annotation.title = method.$.signature;
@@ -41,6 +54,10 @@ class TestNgStatusEmitter {
               };
 
               annotations.push(annotation);
+            } else if (method.$.status == "PASS") {
+              report._tests.succeeded++;
+            } else if (method.$.status == "SKIP") {
+              report._tests.skipped++;
             }
           });
         });
@@ -63,7 +80,10 @@ class TestNgStatusEmitter {
       uuid: uid,
       checkStatus: annotations.length == 0 ? Harness.Conclusion.PASSED : Harness.Conclusion.BLOCKED,
       title: `${annotations.length} failed tests`,
-      annotations: annotations
+      annotations: annotations,
+      metadata: {
+        tests: event.report._tests
+      }
     };
 
     notificationData.markdown = this.templateEngine.template<TestNg.ReportTemplate>(

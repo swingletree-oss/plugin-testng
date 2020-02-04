@@ -15,6 +15,12 @@ export namespace TestNg {
 
   export interface Report {
     "testng-results": SuiteCollection;
+    _tests: {
+      failed: number;
+      total: number;
+      succeeded: number;
+      skipped: number;
+    }
   }
 
   export interface SuiteCollection {

@@ -2,6 +2,7 @@
 
 import * as chai from "chai";
 import { describe } from "mocha";
+import { expect } from "chai";
 import * as sinon from "sinon";
 import { ConfigurationServiceMock, TemplateEngineMock } from "../mock-classes";
 import TestNgStatusEmitter from "../../src/status-emitter";
@@ -10,8 +11,6 @@ import * as xml2js from "xml2js";
 import * as fs from "fs";
 
 chai.use(require("sinon-chai"));
-
-const sandbox = sinon.createSandbox();
 
 describe("Status Emitter", () => {
 
@@ -32,9 +31,27 @@ describe("Status Emitter", () => {
 
 
   it(`should transform report to annotations`, async () => {
-
     const result = (uut as any).getAnnotations(testData);
 
-    console.log(JSON.stringify(result, null, 2));
+    expect(result).not.to.be.undefined;
+    expect(result.length).to.equal(1);
+    expect(result[0]).to.include({
+      "type": "project",
+      "severity": "blocker",
+      "title": "test1()",
+      "detail": "someDescription2"
+    });
+  });
+
+
+  it(`should count test states`, async () => {
+    const result = (uut as any).getAnnotations(testData);
+
+    expect(testData._tests).to.include({
+      failed: 1,
+      skipped: 0,
+      succeeded: 2,
+      total: 3
+    });
   });
 });
