@@ -28,10 +28,8 @@ describe("Status Emitter", () => {
     );
   });
 
-
-
   it(`should transform report to annotations`, async () => {
-    const result = (uut as any).getAnnotations(testData);
+    const result = (uut as any).processEvent(testData);
 
     expect(result).not.to.be.undefined;
     expect(result.length).to.equal(1);
@@ -45,7 +43,7 @@ describe("Status Emitter", () => {
 
 
   it(`should count test states`, async () => {
-    const result = (uut as any).getAnnotations(testData);
+    const result = (uut as any).processEvent(testData);
 
     expect(testData._tests).to.include({
       failed: 1,
@@ -54,4 +52,5 @@ describe("Status Emitter", () => {
       total: 3
     });
   });
+
 });

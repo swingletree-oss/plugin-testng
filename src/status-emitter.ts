@@ -20,7 +20,7 @@ class TestNgStatusEmitter {
     this.context = configurationService.get(TestNgConfig.CONTEXT);
   }
 
-  public getAnnotations(report: TestNg.Report): Harness.Annotation[] {
+  public processEvent(report: TestNg.Report): Harness.Annotation[] {
     const annotations: Harness.Annotation[] = [];
 
     const results = report["testng-results"];
@@ -68,10 +68,11 @@ class TestNgStatusEmitter {
   }
 
   public async sendReport(event: TestNgReportData, uid: string) {
-    const annotations = this.getAnnotations(event.report);
+    const annotations = this.processEvent(event.report);
 
     const templateData: TestNg.ReportTemplate = {
-      event: event
+      event: event,
+      annotations: annotations
     };
 
     const notificationData: Harness.AnalysisReport = {
@@ -79,8 +80,9 @@ class TestNgStatusEmitter {
       source: event.source,
       uuid: uid,
       checkStatus: annotations.length == 0 ? Harness.Conclusion.PASSED : Harness.Conclusion.BLOCKED,
-      title: `${annotations.length} failed tests`,
+      title: `${event.report._tests.failed} failed tests`,
       annotations: annotations,
+      markdown: this.templateEngine.template(Templates.REPORT, event),
       metadata: {
         tests: event.report._tests
       }

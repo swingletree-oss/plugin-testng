@@ -1,29 +1,6 @@
 {# Context Type: TestNgReportTemplate -#}
 
-{% if event.report.site.length > 0 %}
-{%  for site in event.report.site -%}
-{%   for alert in site.alerts | sort(true, false, "riskcode") -%}
+<span title="Succeeded">&#x2714;&#xFE0F;</span> **{{ event._tests.succeeded }}** &bull;
+<span title="Skipped">&#x23ed;</span> **{{ event._tests.skipped }}** &bull;
+<span title="Failed">&#x274C;</span> **{{ event._tests.failed }}**
 
-### {{ alert.riskcode | zapRiskcodeIcon | safe }} {{ alert.alert }}
-
-**Risk(Confidence):** {{ alert.riskdesc }}
-
-{{ alert.desc | striptags }}
-
-<details><summary>show affected instances</summary><p><ul>
-{%-    for instance in alert.instances %}
-<li>{{ instance.uri }}</li>
-{%-    endfor -%}
-</ul></p></details>
-
-{%    if alert.solution %}
-#### Solution
-
-{{ alert.solution | striptags }}
-{%    endif %}
----
-{%   endfor %}
-{%  endfor %}
-{% endif %}
-
-Zap version {{ event.report['@version'] }}, generated {{ event.report['@generated'] }}

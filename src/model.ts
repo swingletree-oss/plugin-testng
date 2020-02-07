@@ -91,5 +91,6 @@ export namespace TestNg {
 
   export interface ReportTemplate extends TemplateData {
     event: TestNgReportData;
+    annotations: Harness.Annotation[];
   }
 }
