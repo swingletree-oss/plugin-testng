@@ -14,7 +14,7 @@ import { TestNg } from "../../src/model";
 
 chai.use(require("sinon-chai"));
 
-describe("Status Emitter", () => {
+describe("Templating", () => {
 
   let uut: TemplateEngine;
   let statusEmitter;
