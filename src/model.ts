@@ -20,7 +20,7 @@ export namespace TestNg {
       total: number;
       succeeded: number;
       skipped: number;
-    }
+    };
   }
 
   export interface SuiteCollection {
