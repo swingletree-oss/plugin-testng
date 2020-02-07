@@ -7,6 +7,7 @@ import { inject, injectable } from "inversify";
 import { ConfigurationService, TestNgConfig } from "./configuration";
 import TestNgStatusEmitter from "./status-emitter";
 import { TestNg, TestNgReportData } from "./model";
+import * as xml2js from "xml2js";
 
 /** Provides a Webhook for Sonar
  */
@@ -41,7 +42,9 @@ class TestNgWebhook {
     }
 
     const message: Comms.Gate.PluginReportProcessRequest<TestNg.Report> = req.body;
-    const reportData: TestNg.Report = message.data.report;
+
+    log.debug("parsing xml report");
+    const reportData: TestNg.Report = await xml2js.parseStringPromise(message.data.report);
 
     if (!message.meta || !message.meta.source) {
       res.status(400).send(
