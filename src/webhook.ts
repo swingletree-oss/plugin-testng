@@ -44,7 +44,17 @@ class TestNgWebhook {
     const message: Comms.Gate.PluginReportProcessRequest<TestNg.Report> = req.body;
 
     log.debug("parsing xml report");
-    const reportData: TestNg.Report = await xml2js.parseStringPromise(message.data.report);
+
+    let reportData: TestNg.Report;
+    try {
+      reportData = await xml2js.parseStringPromise(message.data.report);
+    } catch (err) {
+      log.info("failed to parse provided xml. %j", err);
+      res.status(400).send({
+        errors: [new Comms.BadRequestError("testng report xml could not be parsed.")]
+      } as Comms.Message.ErrorMessage);
+      return;
+    }
 
     if (!message.meta || !message.meta.source) {
       res.status(400).send(
