@@ -4,8 +4,8 @@ import * as chai from "chai";
 import { describe } from "mocha";
 import { expect } from "chai";
 import * as sinon from "sinon";
-import { ConfigurationServiceMock, TemplateEngineMock } from "../mock-classes";
-import TestNgStatusEmitter from "../../src/status-emitter";
+import { ConfigurationServiceMock, TemplateEngineMock } from "./mock-classes";
+import TestNgStatusEmitter from "../src/status-emitter";
 
 import * as xml2js from "xml2js";
 import * as fs from "fs";

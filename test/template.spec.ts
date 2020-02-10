@@ -4,13 +4,13 @@ import * as chai from "chai";
 import { describe } from "mocha";
 import { expect } from "chai";
 import * as sinon from "sinon";
-import { ConfigurationServiceMock, TemplateEngineMock } from "../mock-classes";
-import TestNgStatusEmitter from "../../src/status-emitter";
+import { ConfigurationServiceMock, TemplateEngineMock } from "./mock-classes";
+import TestNgStatusEmitter from "../src/status-emitter";
 
 import * as xml2js from "xml2js";
 import * as fs from "fs";
-import { TemplateEngine, Templates } from "../../src/template/template-engine";
-import { TestNg } from "../../src/model";
+import { TemplateEngine, Templates } from "../src/template/template-engine";
+import { TestNg } from "../src/model";
 
 chai.use(require("sinon-chai"));
 
@@ -44,8 +44,8 @@ describe("Templating", () => {
     const markdown = uut.template(Templates.REPORT, templateData);
 
     expect(markdown).to.be.not.undefined;
-    expect(markdown).to.include("**2**");
-    expect(markdown).to.include("**0**");
-    expect(markdown).to.include("**1**");
+    expect(markdown).to.include("someDescription2");
+    expect(markdown).to.include("test1()");
+    expect(markdown).to.include("Failed tests");
   });
 });
