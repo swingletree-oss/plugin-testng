@@ -1,0 +1,7 @@
+testng:
+  context: test/testng # defines the check status name
+  debug: false # log testng webhook event requests on debug level
+  port: 4090
+
+  urls:
+    scotty: http://scotty:3000 # scotty base url
