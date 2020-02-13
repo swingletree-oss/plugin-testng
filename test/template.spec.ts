@@ -46,6 +46,26 @@ describe("Templating", () => {
     expect(markdown).to.be.not.undefined;
     expect(markdown).to.include("someDescription2");
     expect(markdown).to.include("test1()");
-    expect(markdown).to.include("Failed tests");
+    expect(markdown).to.include("test2()");
+    expect(markdown).to.include("setUp()");
+  });
+
+  it(`should be able to process multiple test-suites`, async () => {
+    const data = await xml2js.parseStringPromise(fs.readFileSync("./test/mock/testng-report-multiple.xml"));
+    const result = (statusEmitter as any).processEvent(
+      data
+    );
+
+    const templateData: TestNg.ReportTemplate = {
+      event: data,
+      annotations: result
+    };
+
+    const markdown = uut.template(Templates.REPORT, templateData);
+
+    expect(markdown).to.be.not.undefined;
+    expect(markdown).to.include("s2_test1()");
+    expect(markdown).to.include("s2_test2()");
+    expect(markdown).to.include("Suite2");
   });
 });
