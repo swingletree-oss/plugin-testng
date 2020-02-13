@@ -38,27 +38,29 @@ class TestNgStatusEmitter {
           testClass["test-method"]?.forEach((method: TestNg.TestMethod) => {
             report._tests.total++;
 
+            const annotation = new Harness.ProjectAnnotation();
             if (method.$.status == "FAIL") {
               report._tests.failed++;
-
-              const annotation = new Harness.ProjectAnnotation();
               annotation.severity = Harness.Severity.BLOCKER;
-              annotation.title = method.$.signature;
-              annotation.detail = method.$.description;
-              annotation.metadata = {
-                duration_ms: method.$["duration-ms"],
-                suite: suite.$.name,
-                class: testClass.$.name,
-                started: method.$["started-at"],
-                finished: method.$["finished-at"]
-              };
-
-              annotations.push(annotation);
-            } else if (method.$.status == "PASS") {
-              report._tests.succeeded++;
             } else if (method.$.status == "SKIP") {
               report._tests.skipped++;
+              annotation.severity = Harness.Severity.WARNING;
+            } else if (method.$.status == "PASS") {
+              report._tests.succeeded++;
+              return; // continue loop; do not add annotation
             }
+
+            annotation.title = method.$.signature;
+            annotation.detail = method.$.description;
+            annotation.metadata = {
+              duration_ms: method.$["duration-ms"],
+              suite: suite.$.name,
+              class: testClass.$.name,
+              started: method.$["started-at"],
+              finished: method.$["finished-at"]
+            };
+
+            annotations.push(annotation);
           });
         });
       });
