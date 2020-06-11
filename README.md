@@ -11,7 +11,7 @@ Processed data is persisted to ElasticSearch (if enabled) and can be processed t
 ## Sending a scan report to Swingletree
 
 A Gate webhook is published when the TestNg Plugin is enabled.
-It accepts a OWASP Zao scan report in JSON format as a payload and needs some additional query parameters to link the report to a GitHub repository:
+It accepts a TestNG report in XML format as a payload and needs some additional query parameters to link the report to a GitHub repository:
 
 ```yaml
 gate:
