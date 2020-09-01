@@ -1,7 +1,7 @@
 import { inject, injectable } from "inversify";
 import { TemplateEngine, Templates } from "./template/template-engine";
 import { ConfigurationService, TestNgConfig } from "./configuration";
-import { Harness } from "@swingletree-oss/harness";
+import { Harness, log } from "@swingletree-oss/harness";
 import { TestNg, TestNgReportData } from "./model";
 import ScottyClient from "@swingletree-oss/scotty-client";
 
@@ -95,7 +95,11 @@ class TestNgStatusEmitter {
       templateData
     );
 
-    return await this.scottyClient.sendReport(notificationData);
+    try {
+      return await this.scottyClient.sendReport(notificationData);
+    } catch (error) {
+      log.error("could not send payload to scotty.\n%j", error);
+    }
   }
 }
 
